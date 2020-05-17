@@ -9,7 +9,7 @@
 import UIKit
 
 #if FRAMEWORK
-import ZIPFoundation
+//import ZIPFoundation
 #endif
 
 public let kUTTypeDeltaControllerSkin: CFString = "com.rileytestut.delta.skin" as CFString

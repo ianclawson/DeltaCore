@@ -8,7 +8,7 @@
 
 import UIKit
 import CoreImage
-import GLKit
+//import GLKit
 import AVFoundation
 
 // Create wrapper class to prevent exposing GLKView (and its annoying deprecation warnings) to clients.

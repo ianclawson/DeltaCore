@@ -9,7 +9,7 @@
 import Foundation
 import Accelerate
 import CoreImage
-import GLKit
+//import GLKit
 
 protocol VideoProcessor
 {

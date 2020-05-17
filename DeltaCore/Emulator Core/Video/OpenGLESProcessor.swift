@@ -7,7 +7,7 @@
 //
 
 import CoreImage
-import GLKit
+//import GLKit
 
 class OpenGLESProcessor: VideoProcessor
 {
