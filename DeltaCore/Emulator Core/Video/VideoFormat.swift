@@ -14,7 +14,9 @@ extension VideoFormat
     public enum Format: Equatable
     {
         case bitmap(PixelFormat)
+        #if !targetEnvironment(macCatalyst)
         case openGLES
+        #endif
     }
     
     public enum PixelFormat: Equatable

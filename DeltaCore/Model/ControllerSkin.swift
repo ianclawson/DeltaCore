@@ -21,16 +21,16 @@ public extension GameControllerInputType
     static let controllerSkin = GameControllerInputType("controllerSkin")
 }
 
-private extension Archive
-{
-    func extract(_ entry: Entry) throws -> Data
-    {
-        var data = Data()
-        _ = try self.extract(entry) { data.append($0) }
-        
-        return data
-    }
-}
+//private extension Archive
+//{
+//    func extract(_ entry: Entry) throws -> Data
+//    {
+//        var data = Data()
+//        _ = try self.extract(entry) { data.append($0) }
+//
+//        return data
+//    }
+//}
 
 public struct ControllerSkin: ControllerSkinProtocol
 {
@@ -44,59 +44,60 @@ public struct ControllerSkin: ControllerSkinProtocol
     private let representations: [Traits: Representation]
     private let imageCache = NSCache<NSString, UIImage>()
     
-    private let archive: Archive
+//    private let archive: Archive
     
     public init?(fileURL: URL)
     {
-        self.fileURL = fileURL
-        
-        guard let archive = Archive(url: fileURL, accessMode: .read) else { return nil }
-        self.archive = archive
-        
-        guard let infoEntry = archive["info.json"] else { return nil }
-        
-        do
-        {
-            let infoData = try archive.extract(infoEntry)
-            
-            guard let info = try JSONSerialization.jsonObject(with: infoData) as? [String: AnyObject] else { return nil }
-            
-            guard
-                let name = info["name"] as? String,
-                let identifier = info["identifier"] as? String,
-                let isDebugModeEnabled = info["debug"] as? Bool,
-                let representationsDictionary = info["representations"] as? RepresentationDictionary
-            else { return nil }
-            
-            #if FRAMEWORK
-            guard let gameType = info["gameTypeIdentifier"] as? GameType else { return nil }
-            #else
-            guard let gameTypeString = info["gameTypeIdentifier"] as? String else { return nil }
-            let gameType = GameType(gameTypeString)
-            #endif
-            
-            self.name = name
-            self.identifier = identifier
-            self.gameType = gameType
-            self.isDebugModeEnabled = isDebugModeEnabled
-            
-            let representationsSet = ControllerSkin.parsedRepresentations(from: representationsDictionary)
-            
-            var representations = [Traits: Representation]()
-            for representation in representationsSet
-            {
-                representations[representation.traits] = representation
-            }
-            self.representations = representations
-            
-            guard self.representations.count > 0 else { return nil }
-        }
-        catch let error as NSError
-        {
-            print("\(error) \(error.userInfo)")
-            
-            return nil
-        }
+        return nil
+//        self.fileURL = fileURL
+//
+//        guard let archive = Archive(url: fileURL, accessMode: .read) else { return nil }
+//        self.archive = archive
+//
+//        guard let infoEntry = archive["info.json"] else { return nil }
+//
+//        do
+//        {
+//            let infoData = try archive.extract(infoEntry)
+//
+//            guard let info = try JSONSerialization.jsonObject(with: infoData) as? [String: AnyObject] else { return nil }
+//
+//            guard
+//                let name = info["name"] as? String,
+//                let identifier = info["identifier"] as? String,
+//                let isDebugModeEnabled = info["debug"] as? Bool,
+//                let representationsDictionary = info["representations"] as? RepresentationDictionary
+//            else { return nil }
+//
+//            #if FRAMEWORK
+//            guard let gameType = info["gameTypeIdentifier"] as? GameType else { return nil }
+//            #else
+//            guard let gameTypeString = info["gameTypeIdentifier"] as? String else { return nil }
+//            let gameType = GameType(gameTypeString)
+//            #endif
+//
+//            self.name = name
+//            self.identifier = identifier
+//            self.gameType = gameType
+//            self.isDebugModeEnabled = isDebugModeEnabled
+//
+//            let representationsSet = ControllerSkin.parsedRepresentations(from: representationsDictionary)
+//
+//            var representations = [Traits: Representation]()
+//            for representation in representationsSet
+//            {
+//                representations[representation.traits] = representation
+//            }
+//            self.representations = representations
+//
+//            guard self.representations.count > 0 else { return nil }
+//        }
+//        catch let error as NSError
+//        {
+//            print("\(error) \(error.userInfo)")
+//
+//            return nil
+//        }
     }
     
     // Sometimes, recursion really is the best solution ¯\_(ツ)_/¯
@@ -171,48 +172,49 @@ public extension ControllerSkin
     
     func thumbstick(for item: ControllerSkin.Item, traits: Traits, preferredSize: Size) -> (UIImage, CGSize)?
     {
-        guard let representation = self.representation(for: traits) else { return nil }
-        guard let imageName = item.thumbstickImageName, let size = item.thumbstickSize else { return nil }
-        guard let entry = self.archive[imageName] else { return nil }
-        
-        let cacheKey = imageName + self.cacheKey(for: traits, size: preferredSize)
-        
-        if let image = self.imageCache.object(forKey: cacheKey as NSString)
-        {
-            return (image, size)
-        }
-        
-        let thumbstickImage: UIImage?
-        
-        do
-        {
-            let data = try self.archive.extract(entry)
-            
-            switch (imageName as NSString).pathExtension.lowercased()
-            {
-            case "pdf":
-                let assetSize = AssetSize(size: preferredSize)
-                guard let targetSize = assetSize.targetSize(for: representation.traits) else { return nil }
-                
-                let thumbstickSize = CGSize(width: size.width * targetSize.width, height: size.height * targetSize.height)
-                thumbstickImage = UIImage.image(withPDFData: data, targetSize: thumbstickSize)
-                
-            default:
-                thumbstickImage = UIImage(data: data, scale: 1.0)
-            }
-        }
-        catch
-        {
-            print(error)
-            
-            return nil
-        }
-        
-        guard let image = thumbstickImage else { return nil }
-        
-        self.imageCache.setObject(image, forKey: cacheKey as NSString)
-        
-        return (image, size)
+        return nil
+//        guard let representation = self.representation(for: traits) else { return nil }
+//        guard let imageName = item.thumbstickImageName, let size = item.thumbstickSize else { return nil }
+//        guard let entry = self.archive[imageName] else { return nil }
+//
+//        let cacheKey = imageName + self.cacheKey(for: traits, size: preferredSize)
+//
+//        if let image = self.imageCache.object(forKey: cacheKey as NSString)
+//        {
+//            return (image, size)
+//        }
+//
+//        let thumbstickImage: UIImage?
+//
+//        do
+//        {
+//            let data = try self.archive.extract(entry)
+//
+//            switch (imageName as NSString).pathExtension.lowercased()
+//            {
+//            case "pdf":
+//                let assetSize = AssetSize(size: preferredSize)
+//                guard let targetSize = assetSize.targetSize(for: representation.traits) else { return nil }
+//
+//                let thumbstickSize = CGSize(width: size.width * targetSize.width, height: size.height * targetSize.height)
+//                thumbstickImage = UIImage.image(withPDFData: data, targetSize: thumbstickSize)
+//
+//            default:
+//                thumbstickImage = UIImage(data: data, scale: 1.0)
+//            }
+//        }
+//        catch
+//        {
+//            print(error)
+//
+//            return nil
+//        }
+//
+//        guard let image = thumbstickImage else { return nil }
+//
+//        self.imageCache.setObject(image, forKey: cacheKey as NSString)
+//
+//        return (image, size)
     }
     
     func image(for traits: Traits, preferredSize: Size) -> UIImage?
@@ -355,33 +357,34 @@ private extension ControllerSkin
 {
     func image(for representation: Representation, assetSize: AssetSize) -> UIImage?
     {
-        guard let filename = representation.assets[assetSize], let entry = self.archive[filename] else { return nil }
-        
-        do
-        {
-            let data = try self.archive.extract(entry)
-            
-            let image: UIImage?
-            
-            switch assetSize
-            {
-            case .small, .medium, .large:
-                guard let imageScale = assetSize.imageScale(for: representation.traits) else { return nil }
-                image = UIImage(data: data, scale: imageScale)
-                
-            case .resizable:
-                guard let targetSize = assetSize.targetSize(for: representation.traits) else { return nil }
-                image = UIImage.image(withPDFData: data, targetSize: targetSize)
-            }
-            
-            return image
-        }
-        catch
-        {
-            print(error)
-            
-            return nil
-        }
+        return nil
+//        guard let filename = representation.assets[assetSize], let entry = self.archive[filename] else { return nil }
+//
+//        do
+//        {
+//            let data = try self.archive.extract(entry)
+//
+//            let image: UIImage?
+//
+//            switch assetSize
+//            {
+//            case .small, .medium, .large:
+//                guard let imageScale = assetSize.imageScale(for: representation.traits) else { return nil }
+//                image = UIImage(data: data, scale: imageScale)
+//
+//            case .resizable:
+//                guard let targetSize = assetSize.targetSize(for: representation.traits) else { return nil }
+//                image = UIImage.image(withPDFData: data, targetSize: targetSize)
+//            }
+//
+//            return image
+//        }
+//        catch
+//        {
+//            print(error)
+//
+//            return nil
+//        }
     }
     
     func cacheKey(for traits: Traits, size: Size) -> String

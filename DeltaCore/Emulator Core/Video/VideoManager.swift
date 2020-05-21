@@ -30,8 +30,10 @@ public class VideoManager: NSObject, VideoRendering
     public private(set) var gameViews = [GameView]()
     
     public var isEnabled = true
-    
+
+    #if !targetEnvironment(macCatalyst)
     private let context: EAGLContext
+    #endif
     
     private var processor: VideoProcessor
     private var processedImage: CIImage?
@@ -39,12 +41,16 @@ public class VideoManager: NSObject, VideoRendering
     public init(videoFormat: VideoFormat)
     {
         self.videoFormat = videoFormat
+        #if !targetEnvironment(macCatalyst)
         self.context = EAGLContext(api: .openGLES2)!
+        #endif
         
         switch videoFormat.format
         {
         case .bitmap: self.processor = BitmapProcessor(videoFormat: videoFormat)
+        #if !targetEnvironment(macCatalyst)
         case .openGLES: self.processor = OpenGLESProcessor(videoFormat: videoFormat, context: self.context)
+        #endif
         }
         
         super.init()
@@ -56,10 +62,12 @@ public class VideoManager: NSObject, VideoRendering
         {
         case .bitmap:
             self.processor = BitmapProcessor(videoFormat: self.videoFormat)
-            
+
+        #if !targetEnvironment(macCatalyst)
         case .openGLES:
             guard let processor = self.processor as? OpenGLESProcessor else { return }
             processor.videoFormat = self.videoFormat
+        #endif
         }
     }
 }
@@ -68,7 +76,9 @@ public extension VideoManager
 {
     func add(_ gameView: GameView)
     {
+        #if !targetEnvironment(macCatalyst)
         gameView.eaglContext = self.context
+        #endif
         self.gameViews.append(gameView)
     }
     

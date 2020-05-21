@@ -27,7 +27,9 @@ fileprivate extension VideoFormat
         switch self.format
         {
         case .bitmap(let format): return format
+        #if !targetEnvironment(macCatalyst)
         case .openGLES: fatalError("Should not be using VideoFormat.Format.openGLES with BitmapProcessor.")
+            #endif
         }
     }
     

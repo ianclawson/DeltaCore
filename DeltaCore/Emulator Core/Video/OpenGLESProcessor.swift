@@ -5,9 +5,11 @@
 //  Created by Riley Testut on 4/8/19.
 //  Copyright © 2019 Riley Testut. All rights reserved.
 //
+#if !targetEnvironment(macCatalyst)
 
 import CoreImage
-//import GLKit
+import GLKit
+
 
 class OpenGLESProcessor: VideoProcessor
 {
@@ -147,3 +149,5 @@ private extension OpenGLESProcessor
         glViewport(0, 0, GLsizei(self.videoFormat.dimensions.width), GLsizei(self.videoFormat.dimensions.height))
     }
 }
+
+#endif

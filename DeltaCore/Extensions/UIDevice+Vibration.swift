@@ -9,12 +9,14 @@
 import UIKit
 import AudioToolbox
 
+#if !targetEnvironment(macCatalyst)
 @_silgen_name("AudioServicesStopSystemSound")
 func AudioServicesStopSystemSound(_ soundID: SystemSoundID)
 
 // vibrationPattern parameter must be NSDictionary to prevent crash when bridging from Swift.Dictionary.
 @_silgen_name("AudioServicesPlaySystemSoundWithVibration")
 func AudioServicesPlaySystemSoundWithVibration(_ soundID: SystemSoundID, _ idk: Any?, _ vibrationPattern: NSDictionary)
+#endif
 
 public extension UIDevice
 {
@@ -41,8 +43,12 @@ public extension UIDevice
             // Return false for iOS simulator
             return false
         #else
+            #if targetEnvironment(macCatalyst)
+                return false
+            #else
             // All iPhones support some form of vibration, and potentially future non-iPhone devices will support taptic feedback
             return (self.model.hasPrefix("iPhone")) || self.feedbackSupportLevel != .unsupported
+            #endif
         #endif
     }
     
@@ -53,7 +59,10 @@ public extension UIDevice
         switch self.feedbackSupportLevel
         {
         case .unsupported:
+
+            #if !targetEnvironment(macCatalyst)
             AudioServicesStopSystemSound(kSystemSoundID_Vibrate)
+            #endif
             
             var vibrationLength = 30
             
@@ -66,8 +75,10 @@ public extension UIDevice
             // Must use NSArray/NSDictionary to prevent crash.
             let pattern: [Any] = [false, 0, true, vibrationLength]
             let dictionary: [String: Any] = ["VibePattern": pattern, "Intensity": 1]
-            
+
+            #if !targetEnvironment(macCatalyst)
             AudioServicesPlaySystemSoundWithVibration(kSystemSoundID_Vibrate, nil, dictionary as NSDictionary)
+            #endif
         
         case .basic, .feedbackGenerator: AudioServicesPlaySystemSound(1519) // "peek" vibration
         }
