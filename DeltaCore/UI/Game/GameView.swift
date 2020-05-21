@@ -24,19 +24,19 @@ private class GameViewMTKViewDelegate: NSObject, MTKViewDelegate
     }
     
 //    func glkView(_ view: GLKView, drawIn rect: CGRect)
-    func mtkView(_ view: MTKView, drawIn rect: CGRect)
-    {
-//        self.gameView?.glkView(view, drawIn: rect)
-        self.gameView?.mtkView(view, drawIn: rect)
-    }
+//    func mtkView(_ view: MTKView, drawIn rect: CGRect)
+//    {
+////        self.gameView?.glkView(view, drawIn: rect)
+//        self.gameView?.mtkView(view, drawIn: rect)
+//    }
     
     // MTKViewDelegate
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        <#code#>
+        
     }
     
     func draw(in view: MTKView) {
-        <#code#>
+        self.gameView?.draw(in: view)
     }
 }
 
@@ -94,17 +94,17 @@ public class GameView: UIView
         return outputImage
     }
     
-    internal var eaglContext: EAGLContext {
-        get { return self.glkView.context }
-        set {
-            // For some reason, if we don't explicitly set current EAGLContext to nil, assigning
-            // to self.glkView may crash if we've already rendered to a game view.
-            EAGLContext.setCurrent(nil)
-            
-            self.glkView.context = newValue
-            self.context = self.makeContext()
-        }
-    }
+//    internal var eaglContext: EAGLContext {
+//        get { return self.glkView.context }
+//        set {
+//            // For some reason, if we don't explicitly set current EAGLContext to nil, assigning
+//            // to self.glkView may crash if we've already rendered to a game view.
+//            EAGLContext.setCurrent(nil)
+//
+//            self.glkView.context = newValue
+//            self.context = self.makeContext()
+//        }
+//    }
     private lazy var context: CIContext = self.makeContext()
         
 //    private let glkView: GLKView
@@ -114,22 +114,43 @@ public class GameView: UIView
     
     public override init(frame: CGRect)
     {
-        let eaglContext = EAGLContext(api: .openGLES2)!
-        self.glkView = GLKView(frame: CGRect.zero, context: eaglContext)
+//        let eaglContext = EAGLContext(api: .openGLES2)!
+//        self.glkView = GLKView(frame: CGRect.zero, context: eaglContext)
+//
+//        super.init(frame: frame)
+//
+//        self.initialize()
+        
+        guard let device = MTLCreateSystemDefaultDevice() else {
+            fatalError("Unable to create metal device. Aborting.")
+        }
+        
+        self.mtkView = MTKView(frame: CGRect.zero, device: device)
         
         super.init(frame: frame)
-        
+
         self.initialize()
     }
     
     public required init?(coder aDecoder: NSCoder)
     {
-        let eaglContext = EAGLContext(api: .openGLES2)!
-        self.glkView = GLKView(frame: CGRect.zero, context: eaglContext)
+//        let eaglContext = EAGLContext(api: .openGLES2)!
+//        self.glkView = GLKView(frame: CGRect.zero, context: eaglContext)
+//
+//        super.init(coder: aDecoder)
+//
+//        self.initialize()
+        
+        guard let device = MTLCreateSystemDefaultDevice() else {
+            fatalError("Unable to create metal device. Aborting.")
+        }
+        
+        self.mtkView = MTKView(frame: CGRect.zero, device: device)
         
         super.init(coder: aDecoder)
         
         self.initialize()
+        
     }
     
     private func initialize()
@@ -212,7 +233,8 @@ private extension GameView
 {
     func makeContext() -> CIContext
     {
-        let context = CIContext(eaglContext: self.glkView.context, options: [.workingColorSpace: NSNull()])
+//        let context = CIContext(eaglContext: self.glkView.context, options: [.workingColorSpace: NSNull()])
+        let context = CIContext(mtlDevice: self.mtkView.device!, options: [.workingColorSpace : NSNull()])
         return context
     }
     
@@ -239,14 +261,20 @@ private extension GameView
 //            self.context.draw(outputImage, in: bounds, from: outputImage.extent)
 //        }
 //    }
-    func mtkView(_ view: MTKView, drawIn rect: CGRect)
+    
+//    func mtkView(_ view: MTKView, drawIn rect: CGRect)
+    func draw(in view: MTKView)
     {
-        glClearColor(0.0, 0.0, 0.0, 1.0)
-        glClear(UInt32(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT))
+        
+//        glClearColor(0.0, 0.0, 0.0, 1.0)
+//        glClear(UInt32(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT))
+        view.currentRenderPassDescriptor?.depthAttachment.loadAction = .clear
+        view.currentRenderPassDescriptor?.depthAttachment.clearDepth = 1.0
         
         if let outputImage = self.outputImage
         {
-            let bounds = CGRect(x: 0, y: 0, width: self.glkView.drawableWidth, height: self.glkView.drawableHeight)
+//            let bounds = CGRect(x: 0, y: 0, width: self.glkView.drawableWidth, height: self.glkView.drawableHeight)
+            let bounds = CGRect(x: 0, y: 0, width: self.mtkView.drawableSize.width, height: self.mtkView.drawableSize.height)
             self.context.draw(outputImage, in: bounds, from: outputImage.extent)
         }
     }
