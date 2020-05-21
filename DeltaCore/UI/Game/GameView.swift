@@ -23,14 +23,7 @@ private class GameViewMTKViewDelegate: NSObject, MTKViewDelegate
         self.gameView = gameView
     }
     
-//    func glkView(_ view: GLKView, drawIn rect: CGRect)
-//    func mtkView(_ view: MTKView, drawIn rect: CGRect)
-//    {
-////        self.gameView?.glkView(view, drawIn: rect)
-//        self.gameView?.mtkView(view, drawIn: rect)
-//    }
     
-    // MTKViewDelegate
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         
     }
