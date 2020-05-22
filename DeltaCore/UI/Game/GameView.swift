@@ -99,6 +99,7 @@ public class GameView: UIView
 //        }
 //    }
     private lazy var context: CIContext = self.makeContext()
+    let commandQueue: MTLCommandQueue
         
 //    private let glkView: GLKView
 //    private lazy var glkViewDelegate = GameViewGLKViewDelegate(gameView: self)
@@ -114,9 +115,12 @@ public class GameView: UIView
 //
 //        self.initialize()
         
+        
+        
         guard let device = MTLCreateSystemDefaultDevice() else {
             fatalError("Unable to create metal device. Aborting.")
         }
+        commandQueue = device.makeCommandQueue(maxCommandBufferCount: 5)!
         
         self.mtkView = MTKView(frame: CGRect.zero, device: device)
         
@@ -137,6 +141,7 @@ public class GameView: UIView
         guard let device = MTLCreateSystemDefaultDevice() else {
             fatalError("Unable to create metal device. Aborting.")
         }
+        commandQueue = device.makeCommandQueue(maxCommandBufferCount: 5)!
         
         self.mtkView = MTKView(frame: CGRect.zero, device: device)
         
@@ -147,7 +152,8 @@ public class GameView: UIView
     }
     
     private func initialize()
-    {        
+    {
+        self.mtkView.framebufferOnly = false
 //        self.glkView.frame = self.bounds
 //        self.glkView.delegate = self.glkViewDelegate
 //        self.glkView.enableSetNeedsDisplay = false
@@ -268,7 +274,15 @@ private extension GameView
         {
 //            let bounds = CGRect(x: 0, y: 0, width: self.glkView.drawableWidth, height: self.glkView.drawableHeight)
             let bounds = CGRect(x: 0, y: 0, width: self.mtkView.drawableSize.width, height: self.mtkView.drawableSize.height)
-            self.context.draw(outputImage, in: bounds, from: outputImage.extent)
+
+            /**
+             WAS
+             //            self.context.draw(outputImage, in: bounds, from: outputImage.extent)
+             THIS WILL NOT WORK BECAUSE
+             [api] -[CIContext drawImage:inRect:fromRect:] requires a CIContext created with a GL context or a CG context
+             STUPID
+             */
+            draw2(image: outputImage, dRect: bounds)
         }
     }
 }
@@ -277,6 +291,59 @@ private extension GameView {
     func display()
     {
         // TODO: replace display logic with MTK equivilent
+    }
+    
+//    func draw1(image: CIImage) {
+//        guard let ciContext = context,
+//            let commandQueue = commandQueue,
+//            let mtlDrawable = currentDrawable,
+//            let commandBuffer = commandQueue.makeCommandBuffer() else { return }
+//
+//        let colorSpace = CGColorSpaceCreateDeviceRGB()
+//
+//        // 描画領域と同じサイズの画像を用意する(はみ出た分は切り取る)
+//        let aspectRatio = drawableSize.width / drawableSize.height
+//        let imageWidthAspectFit = image.extent.height * aspectRatio
+//        let scale = (drawableSize.height / image.extent.height)
+//        let displayImage = image
+//            .cropped(to: CGRect(origin: CGPoint(x: (image.extent.width - imageWidthAspectFit) / 2, y: 0),
+//                                size: CGSize(width: imageWidthAspectFit, height: image.extent.height)))
+//            .transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+//
+//        ciContext.render(displayImage,
+//                         to: mtlDrawable.texture,
+//                         commandBuffer: commandBuffer,
+//                         bounds: displayImage.extent,
+//                         colorSpace: colorSpace)
+//
+//        commandBuffer.present(mtlDrawable)
+//        commandBuffer.commit()
+//        commandBuffer.waitUntilCompleted()
+//    }
+//
+//
+    func draw2(image: CIImage,  dRect: CGRect) {
+
+
+        let drawImage: CIImage
+
+        if dRect == image.extent {
+            drawImage = image
+        } else {
+            let scale = max(dRect.height / image.extent.height, dRect.width / image.extent.width)
+            drawImage = image.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+        }
+
+        let commandBuffer = commandQueue.makeCommandBufferWithUnretainedReferences()
+        guard let texture = self.mtkView.currentDrawable?.texture else {
+            return
+        }
+        let colorSpace = drawImage.colorSpace ?? CGColorSpaceCreateDeviceRGB()
+
+        context.render(drawImage, to: texture, commandBuffer: commandBuffer, bounds: dRect, colorSpace: colorSpace)
+
+        commandBuffer?.present(self.mtkView.currentDrawable!)
+        commandBuffer?.commit()
     }
 }
 
