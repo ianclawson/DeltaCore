@@ -58,7 +58,11 @@ public final class EmulatorCore: NSObject
     }
     
     public let deltaCore: DeltaCoreProtocol
-    public var preferredRenderingSize: CGSize { return self.deltaCore.videoFormat.dimensions }
+    public var preferredRenderingSize: CGSize {
+        return (deltaCore.videoFormat.preferredRenderingSize != nil)
+        ? deltaCore.videoFormat.preferredRenderingSize!
+        : deltaCore.videoFormat.dimensions
+    }
     
     //MARK: - Private Properties
     
@@ -96,6 +100,8 @@ public final class EmulatorCore: NSObject
         
         self.deltaCore = deltaCore
         
+        self.deltaCore.emulatorBridge.durrrURL = self.deltaCore.directoryURL
+        
         self.game = game
         
         // Store separately in case self.game is an NSManagedObject subclass, and we need to access .type or .gameSaveURL on a different thread than its NSManagedObjectContext
@@ -131,6 +137,7 @@ public extension EmulatorCore
         self.deltaCore.emulatorBridge.saveUpdateHandler = { [unowned self] in
             self.save()
         }
+        self.deltaCore.emulatorBridge.durrrURL = self.deltaCore.directoryURL
         
         self.audioManager.start()
         self.deltaCore.emulatorBridge.start(withGameURL: self.game.fileURL)

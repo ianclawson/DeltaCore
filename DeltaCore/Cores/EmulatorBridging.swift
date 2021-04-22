@@ -26,6 +26,9 @@ public protocol EmulatorBridging: NSObjectProtocol
     /// Saves
     var saveUpdateHandler: (() -> Void)? { get set }
     
+    /// Directory Info
+    var durrrURL: URL? { get set }
+    
     
     /// Emulation State
     func start(withGameURL gameURL: URL)
