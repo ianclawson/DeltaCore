@@ -58,7 +58,11 @@ public final class EmulatorCore: NSObject
     }
     
     public let deltaCore: DeltaCoreProtocol
-    public var preferredRenderingSize: CGSize { return self.deltaCore.videoFormat.dimensions }
+    public var preferredRenderingSize: CGSize {
+        return (deltaCore.videoFormat.preferredAspectRatio != nil)
+        ? deltaCore.videoFormat.preferredAspectRatio!
+        : deltaCore.videoFormat.dimensions
+    }
     
     //MARK: - Private Properties
     
@@ -480,7 +484,7 @@ private extension EmulatorCore
                 let state = self._state
                 
                 defer
-                {                    
+                {
                     if self.previousState != state
                     {
                         NotificationCenter.default.post(name: EmulatorCore.didUpdateFrameNotification, object: self)

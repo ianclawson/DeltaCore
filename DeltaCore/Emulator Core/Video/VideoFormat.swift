@@ -38,10 +38,12 @@ public struct VideoFormat: Equatable
 {
     public var format: Format
     public var dimensions: CGSize
+    public var preferredAspectRatio: CGSize?
     
-    public init(format: Format, dimensions: CGSize)
+    public init(format: Format, dimensions: CGSize, preferredAspectRatio: CGSize? = nil)
     {
         self.format = format
         self.dimensions = dimensions
+        self.preferredAspectRatio = preferredAspectRatio
     }
 }
