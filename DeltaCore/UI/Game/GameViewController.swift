@@ -97,8 +97,9 @@ open class GameViewController: UIViewController, GameControllerReceiver
     private var _previousControllerSkinTraits: ControllerSkin.Traits?
     
     // Screen Mirroing
-    public var mirroredWindow: UIWindow?
-    public var mirroredScreen: UIScreen?
+    public var isAirplayEnabled: Bool = false
+    public var airplayWindow: UIWindow?
+//    public var mirroredScreen: UIScreen?
     
     /// UIViewController
     open override var prefersStatusBarHidden: Bool {
@@ -169,6 +170,8 @@ open class GameViewController: UIViewController, GameControllerReceiver
         
         let tapGestureRecognizer = UITapGestureRecognizer(target: self.controllerView, action: #selector(ControllerView.becomeFirstResponder))
         self.view.addGestureRecognizer(tapGestureRecognizer)
+        
+        self.handleAirplayScreen()
         
         self.prepareForGame()
     }
@@ -301,7 +304,7 @@ open class GameViewController: UIViewController, GameControllerReceiver
         
         /* Game View */
         if
-            mirroredScreen == nil,
+            airplayWindow == nil,
             let controllerSkin = self.controllerView.controllerSkin,
             let traits = self.controllerView.controllerSkinTraits,
             let screens = controllerSkin.screens(for: traits),
@@ -317,7 +320,7 @@ open class GameViewController: UIViewController, GameControllerReceiver
         {
             var screenAspectRatioToUse = screenAspectRatio
             var availableGameFrameToUse = availableGameFrame
-            if let mirroredScreen = mirroredScreen {
+            if let mirroredScreen = airplayWindow {
                 availableGameFrameToUse = mirroredScreen.bounds
                 if screenAspectRatio.height > screenAspectRatio.width {
                     // the only VideoFormat where height > width (for now) is melonDS; correct height for non-touch screen
@@ -414,7 +417,7 @@ extension GameViewController
                 let outputFrame = screen.outputFrame.applying(.init(scaleX: self.view.bounds.width, y: self.view.bounds.height))
                 gameView.frame = outputFrame
                 
-                if let mirroredScreen = mirroredScreen
+                if let mirroredScreen = airplayWindow
                 {
                     let screenAspectRatio = self.emulatorCore?.preferredRenderingSize ?? CGSize(width: 1, height: 1)
                     let gameViewFrame = AVMakeRect(aspectRatio: screenAspectRatio, insideRect: mirroredScreen.bounds)
@@ -621,73 +624,71 @@ private extension GameViewController
 {
     @objc func screenDidConnect()
     {
-        self.enableMirroringIfApplicable()
+        self.handleAirplayScreen()
     }
 
     @objc func screenDidDisconnect()
     {
-        self.disableMirroring()
+        self.handleAirplayScreen()
     }
     
     @objc func screenModeDidChange()
     {
-        self.disableMirroring()
-        self.enableMirroringIfApplicable()
+        self.handleAirplayScreen()
     }
 }
 
 public extension GameViewController
 {
-    func enableMirroringIfApplicable()
+    func handleAirplayScreen()
     {
-        guard UIScreen.screens.count > 1, let externalScreen = UIScreen.screens.last else { return }
-        self.mirroredScreen = externalScreen
+        // perform teardown first if already AirPlaying and screens are being switched
+        if self.airplayWindow != nil
+        {
+            self.gameView.removeFromSuperview()
+            self.view.insertSubview(self.gameView, belowSubview: self.controllerView)
+            
+            self.airplayWindow = nil
+            
+            self.gameView.setNeedsLayout()
+            self.gameView.layoutIfNeeded()
+            self.view.setNeedsLayout()
+            self.view.layoutIfNeeded()
+        }
         
-        // Find max resolution
+        // now perform setup of AirPlay screen
+        guard
+            self.isAirplayEnabled,
+            UIScreen.screens.count > 1
+        else { return }
+        
+        let secondScreen = UIScreen.screens[1]
+        
+        // find max resolution
         var max = CGSize(width: 0, height: 0)
         var maxScreenMode: UIScreenMode? = nil
-        if let mirroredScreen = mirroredScreen
+        for mode in secondScreen.availableModes
         {
-            for mode in mirroredScreen.availableModes
+            if (maxScreenMode == nil || mode.size.height > max.height || mode.size.width > max.width)
             {
-                if (maxScreenMode == nil || mode.size.height > max.height || mode.size.width > max.width)
-                {
-                    max = mode.size
-                    maxScreenMode = mode
-                }
+                max = mode.size
+                maxScreenMode = mode
             }
         }
-        self.mirroredScreen?.currentMode = maxScreenMode
+        secondScreen.currentMode = maxScreenMode
         
-        // Setup window in external screen
-        if let mirroredScreen = mirroredScreen
-        {
-            self.mirroredWindow = UIWindow(frame: mirroredScreen.bounds)
-            self.mirroredWindow?.isHidden = false
-            self.mirroredWindow?.layer.contentsGravity = .resizeAspect
-            self.mirroredWindow?.screen = mirroredScreen
-        }
+        // setup window on second screen
+        self.airplayWindow = UIWindow(frame: secondScreen.bounds)
+        self.airplayWindow?.isHidden = false
+        self.airplayWindow?.layer.contentsGravity = .resizeAspect
+        self.airplayWindow?.screen = secondScreen
         
         self.gameView.removeFromSuperview()
         
-        self.mirroredWindow?.addSubview(self.gameView)
-        self.gameView.frame = mirroredWindow?.frame ?? .zero
+        self.airplayWindow?.addSubview(self.gameView)
+        self.gameView.frame = airplayWindow?.frame ?? .zero
         
         self.gameView.setNeedsLayout()
-        self.mirroredWindow?.layoutIfNeeded()
-    }
-    
-    func disableMirroring()
-    {
-        self.gameView.removeFromSuperview()
-        self.view.insertSubview(self.gameView, belowSubview: self.controllerView)
-        
-        self.mirroredScreen = nil
-        self.mirroredWindow = nil
-        
-        self.gameView.setNeedsLayout()
-        self.gameView.layoutIfNeeded()
-        self.view.setNeedsLayout()
-        self.view.layoutIfNeeded()
+        self.airplayWindow?.layoutIfNeeded()
     }
 }
