@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		37BC372026B0D296002015A9 /* IOSurface+VideoRendering.swift in Sources */ = {isa = PBXBuildFile; fileRef = D507082626AF6413006E6C22 /* IOSurface+VideoRendering.swift */; };
 		BF0B260B23E91745007BE38B /* Bundle+Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0B260A23E91745007BE38B /* Bundle+Resources.swift */; };
 		BF0BC4FA225C138A000151C6 /* BitmapProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0BC4F9225C138A000151C6 /* BitmapProcessor.swift */; };
 		BF0BC4FD225C15E8000151C6 /* OpenGLESProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0BC4FC225C15E8000151C6 /* OpenGLESProcessor.swift */; };
@@ -70,7 +71,6 @@
 		BFF703D41B4888100098561C /* Input.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF703D31B4888100098561C /* Input.swift */; };
 		BFF7C8C7257705FC00E55F36 /* TouchControllerSkin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF7C8C6257705FC00E55F36 /* TouchControllerSkin.swift */; };
 		BFF912D01AB08E7000AC07A1 /* EmulatorCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF912CF1AB08E7000AC07A1 /* EmulatorCore.swift */; };
-		D507082726AF6413006E6C22 /* IOSurface+VideoRendering.swift in Sources */ = {isa = PBXBuildFile; fileRef = D507082626AF6413006E6C22 /* IOSurface+VideoRendering.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -597,7 +597,6 @@
 				BFF912D01AB08E7000AC07A1 /* EmulatorCore.swift in Sources */,
 				BFF7C8C7257705FC00E55F36 /* TouchControllerSkin.swift in Sources */,
 				BF85F47A2567494600E4D10E /* DLTAMuteSwitchMonitor.m in Sources */,
-				D507082726AF6413006E6C22 /* IOSurface+VideoRendering.swift in Sources */,
 				BF6834021C459C250052249F /* AudioManager.swift in Sources */,
 				BF4696BC22F7DB98008DD7F2 /* ButtonsInputView.swift in Sources */,
 				BF5996921EA01DC000595F8D /* FilterChain.swift in Sources */,
@@ -612,6 +611,7 @@
 				BFBAE94520CC6E1A00E78FBC /* ExtensibleEnums.swift in Sources */,
 				BFEC23CD1D247E4A00B3A6A9 /* AudioRendering.swift in Sources */,
 				BF3273D51B86428200494CFC /* ExternalGameControllerManager.swift in Sources */,
+				37BC372026B0D296002015A9 /* IOSurface+VideoRendering.swift in Sources */,
 				BF78880D1C27F5AB0088084C /* UIImage+PDF.swift in Sources */,
 				BF9279541D2B53E2003084F3 /* GameViewController.swift in Sources */,
 				BF9873C11AB6C8BF0001D8C9 /* GameView.swift in Sources */,

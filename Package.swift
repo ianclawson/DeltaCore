@@ -26,7 +26,7 @@ let package = Package(
                 "Emulator Core/Video",
                 "Emulator Core/Audio/AudioManager.swift",
                 "Emulator Core/Audio/RingBuffer.swift",
-                "Extensions",
+//                "Extensions",
                 "Filters",
                 "Game Controllers",
                 "Model",
